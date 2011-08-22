@@ -25,9 +25,9 @@ public class EntityRenderer {
 		//this.entities.add(new QuadEntity());
 		try {
 			//Entity entity = ObjEntity.load("C:\\Users\\brad.heller\\Desktop\\pyramid.obj");
-			Entity entity = ObjEntity.load("C:\\Users\\brad.heller\\Desktop\\untitled.obj");
+			//Entity entity = ObjEntity.load("C:\\Users\\brad.heller\\Desktop\\untitled.obj");
 			//Entity entity = ObjEntity.load("C:\\Users\\brad.heller\\Desktop\\ak47.obj");
-			//Entity entity = ObjEntity.load("C:\\Users\\brad.heller\\Desktop\\plane.obj");
+			Entity entity = ObjEntity.load("C:\\Users\\brad.heller\\Desktop\\plane.obj");
 			//Entity entity = ObjEntity.load("C:\\Users\\brad.heller\\Desktop\\knife_fork.obj");
 			//Entity entity = ObjEntity.load("C:\\Users\\brad.heller\\Desktop\\anything.obj");
 			entity.changePosition(new Vector(0.0f, 0.0f, -75.0f));
@@ -41,7 +41,7 @@ public class EntityRenderer {
 		
 		GL11.glEnable(GL11.GL_LIGHTING);
 		
-		GL11.glLightModel(GL11.GL_LIGHT_MODEL_AMBIENT, BufferHelper.floatBuffer(new float[] {1.0f, 1.0f, 0.2f, 1.0f}));
+		GL11.glLightModel(GL11.GL_LIGHT_MODEL_LOCAL_VIEWER, BufferHelper.floatBuffer(new float[] {1.0f, 1.0f, 0.2f, 1.0f}));
 		GL11.glLight(GL11.GL_LIGHT1, GL11.GL_POSITION, BufferHelper.floatBuffer(new float[] {0.0f, 10.0f, 0.0f, 0.0f}));
 		GL11.glLight(GL11.GL_LIGHT1, GL11.GL_DIFFUSE, BufferHelper.floatBuffer(new float[] {1.0f, 1.0f, 1.0f, 1.0f}));
 		GL11.glLight(GL11.GL_LIGHT1, GL11.GL_AMBIENT, BufferHelper.floatBuffer(new float[] { 1.0f, 1.0f, 1.0f, 1.0f }));

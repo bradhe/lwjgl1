@@ -20,6 +20,14 @@ public class Vector {
 		return "("+x+", "+y+", "+z+")";
 	}
 	
+	public Vector cross(Vector v1, Vector v2) {
+		return null;
+	}
+	
+	public Vector subtract(Vector v1) {
+		return null;
+	}
+	
 	public boolean equals(Object obj) {
 		if(obj.getClass().equals(Vector.class)) {
 			Vector v = (Vector)obj;

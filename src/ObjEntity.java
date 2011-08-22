@@ -3,11 +3,16 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.NotActiveException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.Queue;
 //import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.SynchronousQueue;
 
 //import org.lwjgl.opengl.ARBVertexBufferObject;
 import org.lwjgl.opengl.GL11;
@@ -29,17 +34,18 @@ public class ObjEntity extends Entity {
 	@Override
 	protected void renderVertices() {
 		GL11.glColor3f(0.8f, 0.8f, 0.8f);
-		//GL11.glBegin(GL11.GL_POLYGON);
-		GL11.glMaterial(GL11.GL_FRONT, GL11.GL_AMBIENT_AND_DIFFUSE, BufferHelper.floatBuffer(new float[] { 1.0f, 0.0f, 0.0f, 1.0f }));
+
+		//GL11.glMaterial(GL11.GL_FRONT, GL11.GL_AMBIENT_AND_DIFFUSE, BufferHelper.floatBuffer(new float[] { 1.0f, 0.0f, 0.0f, 1.0f }));
+		GL11.glMaterial(GL11.GL_FRONT, GL11.GL_AMBIENT, BufferHelper.floatBuffer(new float[] { 1.0f, 1.0f, 0.0f, 1.0f }));
+		GL11.glMaterial(GL11.GL_FRONT, GL11.GL_DIFFUSE, BufferHelper.floatBuffer(new float[] { 1.0f, 1.0f, 0.0f, 1.0f }));
+		GL11.glMaterial(GL11.GL_FRONT, GL11.GL_SPECULAR, BufferHelper.floatBuffer(new float[] { 1.0f, 1.0f, 0.0f, 1.0f }));
 		
 		Vector[] v = new Vector[vertexes.size()];
 		vertexes.toArray(v);
 		
 		GL11.glEnableClientState(GL11.GL_VERTEX_ARRAY);
 		GL11.glVertexPointer(3, 0, BufferHelper.floatBuffer(v));
-		
 		GL11.glDrawElements(geometryType, BufferHelper.intBuffer(indicies));
-		//GL11.glDrawArrays(GL11.GL_POINTS, 0, v.length);
 		GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);
 	}
 	
@@ -62,12 +68,38 @@ public class ObjEntity extends Entity {
 	public void setIndexList(List<Integer> indices) {
 		this.indicies = indices;
 	}
+	
+	public void computeVertexNormals(List<Integer[]> faces) {
+//		// For each triangulated face computer the normal for that face. Then
+//		// set each vert's normal to that face. If the vert already has a normal
+//		// then take the difference of that normal.
+//		Map<Vector, Vector> normals = new Hashtable<Vector, Vector>();
+//		
+//		for(Integer[] faceVertices : faces) {
+//			Vector startVector = vertexes.get(faceVertices[0]);
+//			Vector normal = startVector.cross(vertexes.get(faceVertices[1]), vertexes.get(faceVertices[1]));
+//			
+//			if(normals.containsKey(startVector)) {
+//				normals.put(startVector, startVector.subtract(normal));
+//			}
+//			else {
+//				normals.put(startVector, normal);
+//			}
+//		}
+//		
+//		// Okay, now sort by keys and put in a float buffer...I hope no one looks at this.
+//		
+	}
 
 	public static ObjEntity load(String fileName) throws FileNotFoundException {
 		ObjEntity entity = new ObjEntity();
 		List<Vector> verts = new ArrayList<Vector>();
 		List<Integer> indices = new ArrayList<Integer>();
 		Map<Vector, ColorInfo> vertColors = entity.getVertexColorMap();
+		
+
+		// Save face data for later.
+		List<Integer[]> faces = new ArrayList<Integer[]>();
 
 		try {
 			InputStream fis;
@@ -76,7 +108,7 @@ public class ObjEntity extends Entity {
 			
 			String line;
 			ColorInfo currentColorInfo = null;
-						
+									
 			while((line = bufferedReader.readLine()) != null) {
 				// Vertex
 				if(line.startsWith("v ")) {
@@ -119,26 +151,47 @@ public class ObjEntity extends Entity {
 					String[] c = line.split(" ");
 					
 					if(c.length > 4) {
-						// If it's greater than 4 (a quad) whine and continue.
-						if(c.length > 5) {
-							System.err.println("Error: More than 5 indices. Fix this. Indices: " + c.length);
-							continue;
+						Queue<Integer> indexQueue = new LinkedList<Integer>();
+						
+						// The first index will always be in the queue.
+						indexQueue.add(Integer.parseInt(c[1]) - 1);
+						
+						// Next, for each other element in the queue...
+						for(int i = 2; i < c.length; i++) {
+							// Add an element to the queue, then operate on it.
+							indexQueue.add(Integer.parseInt(c[i]) - 1);
+							
+							// If it is three, take the three elements off the queue.
+							// Then put the first and the last back on the queue.
+							if(indexQueue.size() == 3) {
+								Integer first = indexQueue.remove();
+								indices.add(first);
+								
+								Integer middle = indexQueue.remove();
+								indices.add(middle);
+								
+								Integer last = indexQueue.remove();
+								indices.add(last);
+								
+								indexQueue.add(first);
+								indexQueue.add(last);
+								
+								faces.add(new Integer[] { first, middle, last });
+							}
 						}
-						
-						// Insert the first 3 indices
-						indices.add(Integer.parseInt(c[1]) - 1);
-						indices.add(Integer.parseInt(c[2]) - 1);
-						indices.add(Integer.parseInt(c[3]) - 1);
-						
-						// then the next 3 indices
-						indices.add(Integer.parseInt(c[1]) - 1);
-						indices.add(Integer.parseInt(c[3]) - 1);
-						indices.add(Integer.parseInt(c[4]) - 1);
 					}
 					else {
+						Integer[] currentFace = new Integer[3];
 						for(int i = 1; i < c.length; i++) {
-							indices.add(Integer.parseInt(c[i]) - 1);
+							if(c[i].indexOf('/') >= 0) {
+								c[i] = c[i].substring(0, c[i].indexOf('/'));
+							}
+							
+							currentFace[i-1] = Integer.parseInt(c[i]) - 1; 
+							indices.add(currentFace[i-1]);
 						}	
+						
+						faces.add(currentFace);
 					}
 				}
 			}
@@ -146,6 +199,7 @@ public class ObjEntity extends Entity {
 			// Set up vertex array.
 			entity.setVertextList(verts);
 			entity.setIndexList(indices);
+			entity.computeVertexNormals(faces);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new FileNotFoundException("Could not load model file " + fileName);
