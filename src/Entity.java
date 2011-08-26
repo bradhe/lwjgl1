@@ -13,11 +13,13 @@ public abstract class Entity {
 	private float rotation;
 	private float scale;
 	private Vector positionVector;
+	private boolean debug;
 	
 	public Entity() {
 		scale = 1.0f;
 		rotation = 0.0f;
 		positionVector = new Vector();
+		debug = true;
 	}
 	
 	public void render() {
@@ -54,6 +56,19 @@ public abstract class Entity {
 	
 	public float getRotation() {
 		return this.rotation;
+	}
+	
+
+	public void setDebug(boolean debug) {
+		this.debug = debug;
+	}
+	
+	public boolean getDebug() {
+		return this.debug;
+	}
+	
+	public void toggleDebug() {
+		this.debug = !this.debug;
 	}
 	
 	protected void applyTransforms() {

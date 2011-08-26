@@ -84,6 +84,25 @@ public class Game {
 			entities.get(0).setRotation(entities.get(0).getRotation() - 0.5f);
 		}
 		
+		if(Keyboard.isKeyDown(Keyboard.KEY_W)) {
+			entityRenderer.moveCamera(new Vector(0.0f, 0.0f, 1.0f));
+		}
+		else if(Keyboard.isKeyDown(Keyboard.KEY_S)) {
+			entityRenderer.moveCamera(new Vector(0.0f, 0.0f, -1.0f));
+		}
+		
+		if(Keyboard.isKeyDown(Keyboard.KEY_A)) {
+			entityRenderer.rotateCamera(-1.15f);
+		}
+		else if(Keyboard.isKeyDown(Keyboard.KEY_D)){
+			entityRenderer.rotateCamera(1.15f);
+		}
+		
+		if(Keyboard.isKeyDown(Keyboard.KEY_N)){
+			List<Entity> entities = entityRenderer.getEntities();
+			entities.get(0).toggleDebug();
+		}
+		
 		
 		while (Keyboard.next()) {
 		    if (Keyboard.getEventKeyState()) {
