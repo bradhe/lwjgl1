@@ -19,16 +19,13 @@ import org.lwjgl.opengl.GL11;
 
 
 public class ObjEntity extends Entity {
-	private List<Vector> vertexes;
+	private List<Vertex> vertexes;
 	private List<Integer> indicies;
-	private Map<Vector, ColorInfo> vertexColors;
 	private Vector[] normals;
 	private int geometryType;
 	
 	public ObjEntity() {
-		vertexes = new ArrayList<Vector>();
-		indicies = new ArrayList<Integer>();
-		vertexColors = new HashMap<Vector, ColorInfo>();
+		vertexes = new ArrayList<Vertex>();
 		geometryType = GL11.GL_TRIANGLES;
 	}
 	
@@ -42,44 +39,64 @@ public class ObjEntity extends Entity {
 		GL11.glMaterial(GL11.GL_FRONT, GL11.GL_DIFFUSE, BufferHelper.floatBuffer(new float[] { 1.0f, 1.0f, 0.0f, 1.0f }));
 		GL11.glMaterial(GL11.GL_FRONT, GL11.GL_EMISSION, BufferHelper.floatBuffer(new float[] { 0.0f, 0.0f, 0.0f, 1.0f }));
 		GL11.glMaterial(GL11.GL_FRONT, GL11.GL_SPECULAR, BufferHelper.floatBuffer(new float[] { 1.0f, 1.0f, 1.0f, 1.0f }));
-//		
-		Vector[] verts = new Vector[vertexes.size()];
-		vertexes.toArray(verts);
-
-		GL11.glEnableClientState(GL11.GL_VERTEX_ARRAY);
-		GL11.glEnableClientState(GL11.GL_NORMAL_ARRAY);
 		
-		GL11.glVertexPointer(3, 0, BufferHelper.floatBuffer(verts));
-		GL11.glNormalPointer(3, BufferHelper.floatBuffer(normals));
+		//GL11.glEnableClientState(GL11.GL_VERTEX_ARRAY);
+		//GL11.glEnableClientState(GL11.GL_INT);
+		
+		//GL11.glVertexPointer(3, 0, BufferHelper.floatBuffer(verts));
+		//GL11.glNormalPointer(3, BufferHelper.floatBuffer(normals));
+		GL11.glInterleavedArrays(GL11.GL_C4F_N3F_V3F, 0, BufferHelper.floatBuffer(this.vertexes));
 		GL11.glDrawElements(geometryType, BufferHelper.intBuffer(indicies));
 		
 		if(this.getDebug()) {
 			// Lets draw all the normals so that we can see what they look like!
-			for(int i = 0; i < verts.length; i++) {
+			for(Vertex v : this.vertexes) {
+				GL11.glPushMatrix();
+
+				GL11.glTranslatef(v.position.x, v.position.y, v.position.z);
 				GL11.glBegin(GL11.GL_LINES);
-				GL11.glColor3f(1.0f, 1.0f, 1.0f);
-				GL11.glVertex3f(verts[i].x, verts[i].y, verts[i].z);
-				GL11.glVertex3f((verts[i].x + normals[i].x), (verts[i].y + normals[i].y), (verts[i].z + normals[i].z));
+				
+				GL11.glColor3f(1, 0, 0);
+				GL11.glVertex3f(0, 0, 0);
+				GL11.glVertex3f(1, 0, 0);
+				
+				GL11.glColor3f(0, 1, 0);
+				GL11.glVertex3f(0, 0, 0);
+				GL11.glVertex3f(0, 1, 0);
+				
+				GL11.glColor3f(0, 0, 1);
+				GL11.glVertex3f(0, 0, 0);
+				GL11.glVertex3f(0, 0, 1);
+				
 				GL11.glEnd();
+				GL11.glPopMatrix();
 			}
 		}
 		
-		GL11.glDisableClientState(GL11.GL_NORMAL_ARRAY);
-		GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);
+//		GL11.glColor3f(1.0f, 0.0f, 0.0f);
+//		GL11.glVertex3f(0, 0, 0);
+//		GL11.glVertex3f(0, 1, 0);
+//		
+//		GL11.glColor3f(0.0f, 1.0f, 0.0f);
+//		GL11.glVertex3f(0, 0, 0);
+//		GL11.glVertex3f(1, 0, 0);
+//		
+//		GL11.glColor3f(0.0f, 0.0f, 1.0f);
+//		GL11.glVertex3f(0, 0, 0);
+//		GL11.glVertex3f(0, 0, 1);
+//		
+//		GL11.glDisableClientState(GL11.GL_NORMAL_ARRAY);
+//		GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);
 	}
 	
-	public List<Vector> getVertexList() {
+	public List<Vertex> getVertexList() {
 		return vertexes;
 	}
 	
-	public void setVertextList(List<Vector> vertices) {
+	public void setVertextList(List<Vertex> vertices) {
 		vertexes = vertices;
 	}
-	
-	public Map<Vector, ColorInfo> getVertexColorMap() {
-		return vertexColors;
-	}
-	
+
 	public void setGeometryType(int geometryType) {
 		this.geometryType = geometryType;
 	}
@@ -89,58 +106,38 @@ public class ObjEntity extends Entity {
 	}
 
 	public void computeVertexNormals(List<Integer[]> faces) {
-		// For each triangulated face computer the normal for that face. Then
-		// set each vert's normal to that face. If the vert already has a normal
-		// then take the difference of that normal.
-		Map<Vector, List<Vector>> normalsMap = new Hashtable<Vector, List<Vector>>();
+		// Thread safe what?
+		int[] counts = new int[vertexes.size()];
 		
 		for(Integer[] faceVertices : faces) {
-			Vector startVector = vertexes.get(faceVertices[0]);
+			Vertex vert = vertexes.get(faceVertices[0]);
 			
-			Vector normal = startVector.cross(vertexes.get(faceVertices[1]), vertexes.get(faceVertices[2]));
-			normal.normalize();
+			Vector normal = vert.position.cross(vertexes.get(faceVertices[1]).position, vertexes.get(faceVertices[2]).position);
 
-			updateNormal(startVector, normal, normalsMap);
-			updateNormal(vertexes.get(faceVertices[1]), normal, normalsMap);
-			updateNormal(vertexes.get(faceVertices[2]), normal, normalsMap);
+			vert.normal.add(normal);
+			vertexes.get(faceVertices[1]).normal.add(normal);
+			vertexes.get(faceVertices[2]).normal.add(normal);
+			
+			counts[faceVertices[0]] += 1;
+			counts[faceVertices[1]] += 1;
+			counts[faceVertices[1]] += 1;
 		}
 		
-		// Create a new list of normals for each vertice
-		normals = new Vector[vertexes.size()];
-		for(int i = 0; i < vertexes.size(); i++) {
-			List<Vector> allNormals = normalsMap.get(vertexes.get(i));
+		// Now do the reduction.
+		for(int i = 0; i < counts.length; i++) {
+			Vertex vertex = vertexes.get(i);
+			vertex.normal.divide(counts[i]);
 			
-			Vector[] vectorArray = new Vector[allNormals.size()];
-			allNormals.toArray(vectorArray);
-			
-			Vector avg = Vector.average(vectorArray);
-			System.out.println("Average normal vector: " + avg);
-			
-			avg.normalize();
-			System.out.println("Normal: " + avg);
-			normals[i] = avg;  
-		}
-	}
-	
-	private void updateNormal(Vector startVector, Vector normal, Map<Vector, List<Vector>> normalsMap) {
-		if(normalsMap.containsKey(startVector)) {
-			// Average these two vectors
-			normalsMap.get(startVector).add(normal);
-		}
-		else {
-			List<Vector> list = new ArrayList<Vector>();
-			list.add(normal);
-			
-			normalsMap.put(startVector, list);
+			if(!GL11.glIsEnabled(GL11.GL_NORMALIZE)) {
+				vertex.normal.normalize();
+			}			
 		}
 	}
 
 	public static ObjEntity load(String fileName) throws FileNotFoundException {
 		ObjEntity entity = new ObjEntity();
-		List<Vector> verts = new ArrayList<Vector>();
+		List<Vertex> verts = new ArrayList<Vertex>();
 		List<Integer> indices = new ArrayList<Integer>();
-		Map<Vector, ColorInfo> vertColors = entity.getVertexColorMap();
-		
 
 		// Save face data for later.
 		List<Integer[]> faces = new ArrayList<Integer[]>();
@@ -151,7 +148,7 @@ public class ObjEntity extends Entity {
 			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fis));
 			
 			String line;
-			ColorInfo currentColorInfo = null;
+//			ColorInfo currentColorInfo = null;
 									
 			while((line = bufferedReader.readLine()) != null) {
 				// Vertex
@@ -167,30 +164,30 @@ public class ObjEntity extends Entity {
 					if(verts.contains(vertex)) {
 						continue;
 					}
-					verts.add(vertex);
+					verts.add(new Vertex(vertex));
 
 					// If there is a color info, add it to this map.
-					if(currentColorInfo != null) {
-						vertColors.put(vertex, currentColorInfo);
-						
-						// Start over!
-						currentColorInfo = null;
-					}
+//					if(currentColorInfo != null) {
+//						//vertColors.put(vertex, currentColorInfo);
+//						
+//						// Start over!
+//						currentColorInfo = null;
+//					}
 				}
-				else if(line.startsWith("Ka ")) {
-					if(currentColorInfo == null) {
-						currentColorInfo = new ColorInfo();
-					}
-					
-					String[] c = line.split(" ");
-					
-					// Don't do anything if there aren't enough components.
-					if(c.length < 4) {
-						continue;
-					}
-					
-					currentColorInfo.ambient = new Vector(Float.parseFloat(c[1]), Float.parseFloat(c[2]), Float.parseFloat(c[3]));
-				}
+//				else if(line.startsWith("Ka ")) {
+//					if(currentColorInfo == null) {
+//						currentColorInfo = new ColorInfo();
+//					}
+//					
+//					String[] c = line.split(" ");
+//					
+//					// Don't do anything if there aren't enough components.
+//					if(c.length < 4) {
+//						continue;
+//					}
+//					
+//					currentColorInfo.ambient = new Vector(Float.parseFloat(c[1]), Float.parseFloat(c[2]), Float.parseFloat(c[3]));
+//				}
 				else if(line.startsWith("f ")) {
 					String[] c = line.split(" ");
 					

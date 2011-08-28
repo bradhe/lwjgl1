@@ -20,6 +20,12 @@ public class Vector {
 		return "("+x+", "+y+", "+z+")";
 	}
 	
+	public void divide(int i) {
+		this.x /= i;
+		this.y /= i;
+		this.z /= i;
+	}
+	
 	public Vector cross(Vector v) {
 		Vector u = this; // convenience
 		return new Vector((u.y * v.z) - (u.z * v.y), (u.z * v.x) - (u.x * v.z), (u.x * v.y) - (u.y * v.x));

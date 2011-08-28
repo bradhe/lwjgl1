@@ -58,7 +58,6 @@ public abstract class Entity {
 		return this.rotation;
 	}
 	
-
 	public void setDebug(boolean debug) {
 		this.debug = debug;
 	}
