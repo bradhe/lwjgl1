@@ -17,7 +17,7 @@ public class Vector {
 	}
 	
 	public String toString() {
-		return "("+x+", "+y+", "+z+")";
+		return String.format("( %.3f, %.3f, %.3f )", x, y, z);
 	}
 	
 	public void divide(int i) {
@@ -51,11 +51,19 @@ public class Vector {
 	}
 	
 	public void normalize() {
-		float len = (float)length();
+		normalize(this);
+	}
+	
+	public void normalize(Vector copy) {
+		float len = (float)copy.length();
 		//System.out.println("Len ("+x+"): " +" (" + (x * x) + ") " + Math.sqrt((x * x) + (y * y) + (z * z)));
-		x = x / len;
-		y = y / len;
-		z = z / len;
+		copy.x = copy.x / len;
+		copy.y = copy.y / len;
+		copy.z = copy.z / len;
+	}
+	
+	public float dot(Vector v) {
+		return (this.x * v.x) + (this.y * v.y) + (this.z * v.z);
 	}
 	
 	public double length() {

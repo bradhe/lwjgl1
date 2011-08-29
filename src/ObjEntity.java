@@ -35,16 +35,11 @@ public class ObjEntity extends Entity {
 
 		GL11.glColorMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_AMBIENT_AND_DIFFUSE);
 		GL11.glMaterial(GL11.GL_FRONT, GL11.GL_AMBIENT_AND_DIFFUSE, BufferHelper.floatBuffer(new float[] { 0.0f, 1.0f, 0.0f, 1.0f }));
-		GL11.glMaterial(GL11.GL_FRONT, GL11.GL_AMBIENT, BufferHelper.floatBuffer(new float[] { 1.0f, 1.0f,0.0f, 1.0f }));
-		GL11.glMaterial(GL11.GL_FRONT, GL11.GL_DIFFUSE, BufferHelper.floatBuffer(new float[] { 1.0f, 1.0f, 0.0f, 1.0f }));
-		GL11.glMaterial(GL11.GL_FRONT, GL11.GL_EMISSION, BufferHelper.floatBuffer(new float[] { 0.0f, 0.0f, 0.0f, 1.0f }));
-		GL11.glMaterial(GL11.GL_FRONT, GL11.GL_SPECULAR, BufferHelper.floatBuffer(new float[] { 1.0f, 1.0f, 1.0f, 1.0f }));
-		
-		//GL11.glEnableClientState(GL11.GL_VERTEX_ARRAY);
-		//GL11.glEnableClientState(GL11.GL_INT);
-		
-		//GL11.glVertexPointer(3, 0, BufferHelper.floatBuffer(verts));
-		//GL11.glNormalPointer(3, BufferHelper.floatBuffer(normals));
+		GL11.glMaterial(GL11.GL_FRONT, GL11.GL_AMBIENT, BufferHelper.floatBuffer(new float[] { 1.0f, 1.0f, 1.0f, 1.0f }));
+		GL11.glMaterial(GL11.GL_FRONT, GL11.GL_DIFFUSE, BufferHelper.floatBuffer(new float[] { 0.6f, 0.6f, 0.6f, 1.0f }));
+		GL11.glMaterial(GL11.GL_FRONT, GL11.GL_EMISSION, BufferHelper.floatBuffer(new float[] { 0.2f, 0.2f, 0.2f, 1.0f }));
+		GL11.glMaterial(GL11.GL_FRONT, GL11.GL_SPECULAR, BufferHelper.floatBuffer(new float[] { 0.0f, 0.0f, 0.0f, 1.0f }));
+
 		GL11.glInterleavedArrays(GL11.GL_C4F_N3F_V3F, 0, BufferHelper.floatBuffer(this.vertexes));
 		GL11.glDrawElements(geometryType, BufferHelper.intBuffer(indicies));
 		
@@ -54,6 +49,15 @@ public class ObjEntity extends Entity {
 				GL11.glPushMatrix();
 
 				GL11.glTranslatef(v.position.x, v.position.y, v.position.z);
+				
+				// Find the rotation we want.
+				float dot = v.position.dot(v.normal);
+				Vector axis = v.position.cross(v.normal);
+				axis.normalize();
+
+				float angle = (float)((180.0f * Math.acos(dot/v.position.length()))/Math.PI);
+				//System.out.format("Angle: %.4f\n", angle);
+				GL11.glRotatef(angle, axis.x, axis.y, axis.z);
 				GL11.glBegin(GL11.GL_LINES);
 				
 				GL11.glColor3f(1, 0, 0);
@@ -72,21 +76,6 @@ public class ObjEntity extends Entity {
 				GL11.glPopMatrix();
 			}
 		}
-		
-//		GL11.glColor3f(1.0f, 0.0f, 0.0f);
-//		GL11.glVertex3f(0, 0, 0);
-//		GL11.glVertex3f(0, 1, 0);
-//		
-//		GL11.glColor3f(0.0f, 1.0f, 0.0f);
-//		GL11.glVertex3f(0, 0, 0);
-//		GL11.glVertex3f(1, 0, 0);
-//		
-//		GL11.glColor3f(0.0f, 0.0f, 1.0f);
-//		GL11.glVertex3f(0, 0, 0);
-//		GL11.glVertex3f(0, 0, 1);
-//		
-//		GL11.glDisableClientState(GL11.GL_NORMAL_ARRAY);
-//		GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);
 	}
 	
 	public List<Vertex> getVertexList() {
@@ -114,9 +103,9 @@ public class ObjEntity extends Entity {
 			
 			Vector normal = vert.position.cross(vertexes.get(faceVertices[1]).position, vertexes.get(faceVertices[2]).position);
 
-			vert.normal.add(normal);
-			vertexes.get(faceVertices[1]).normal.add(normal);
-			vertexes.get(faceVertices[2]).normal.add(normal);
+			vert.normal = vert.normal.add(normal);
+			vertexes.get(faceVertices[1]).normal = vertexes.get(faceVertices[1]).normal.add(normal);
+			vertexes.get(faceVertices[2]).normal = vertexes.get(faceVertices[2]).normal.add(normal);
 			
 			counts[faceVertices[0]] += 1;
 			counts[faceVertices[1]] += 1;
@@ -131,6 +120,10 @@ public class ObjEntity extends Entity {
 			if(!GL11.glIsEnabled(GL11.GL_NORMALIZE)) {
 				vertex.normal.normalize();
 			}			
+		}
+		
+		for(Vertex v : vertexes) {
+			System.out.format("Position: %s, Normal: %s\n", v.position, v.normal);
 		}
 	}
 

@@ -77,11 +77,11 @@ public class Game {
 		
 		if(Keyboard.isKeyDown(Keyboard.KEY_Z)) {
 			List<Entity> entities = entityRenderer.getEntities();
-			entities.get(0).setRotation(entities.get(0).getRotation() + 0.5f);
+			entities.get(0).setRotation(entities.get(0).getRotation() + 2.0f);
 		}
 		else if(Keyboard.isKeyDown(Keyboard.KEY_X)) {
 			List<Entity> entities = entityRenderer.getEntities();
-			entities.get(0).setRotation(entities.get(0).getRotation() - 0.5f);
+			entities.get(0).setRotation(entities.get(0).getRotation() - 2.0f);
 		}
 		
 //		if(Keyboard.isKeyDown(Keyboard.KEY_W)) {
@@ -97,12 +97,7 @@ public class Game {
 		else if(Keyboard.isKeyDown(Keyboard.KEY_D)){
 			entityRenderer.rotateCamera(1.15f);
 		}
-		
-		if(Keyboard.isKeyDown(Keyboard.KEY_N)){
-			List<Entity> entities = entityRenderer.getEntities();
-			entities.get(0).toggleDebug();
-		}
-		
+
 		while (Keyboard.next()) {
 		    if (Keyboard.getEventKeyState()) {
 		        if (Keyboard.getEventKey() == Keyboard.KEY_F) {
@@ -111,6 +106,13 @@ public class Game {
 		        else if (Keyboard.getEventKey() == Keyboard.KEY_V) {
 		        	Display.setVSyncEnabled(gameWindow.toggleVsync());
 		        }
+		        else if(Keyboard.isKeyDown(Keyboard.KEY_N)){
+					if(!Keyboard.isRepeatEvent()) {
+						List<Entity> entities = entityRenderer.getEntities();
+						entities.get(0).toggleDebug();
+					}
+				}
+				
 		    }
 		}
 	}

@@ -36,8 +36,9 @@ public class EntityRenderer {
 			//Entity entity = ObjEntity.load("C:\\Users\\brad.heller\\Desktop\\knife_fork.obj");
 			//Entity entity = ObjEntity.load("C:\\Users\\brad.heller\\Desktop\\sphere.obj");
 			//Entity entity = ObjEntity.load("C:\\Users\\brad.heller\\Desktop\\anything.obj");
-			Entity entity = ObjEntity.load("C:\\Users\\brad.heller\\Desktop\\sphere2.obj");
-			entity.changePosition(new Vector(0.0f, 0.0f, -45.0f));
+			Entity entity = ObjEntity.load("C:\\Users\\brad.heller\\Desktop\\cube.obj");
+			//Entity entity = ObjEntity.load("C:\\Users\\brad.heller\\Desktop\\sphere2.obj");
+			entity.changePosition(new Vector(0.0f, 0.0f, -15.0f));
 			this.entities.add(entity);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -46,15 +47,15 @@ public class EntityRenderer {
 		
 		setupPerspective();
 		
-//		GL11.glEnable(GL11.GL_LIGHTING);
-//		
-//		GL11.glLightModel(GL11.GL_LIGHT_MODEL_AMBIENT, BufferHelper.floatBuffer(new float[] {0.0f, 0.0f, 0.0f, 1.0f}));
-//		GL11.glLight(GL11.GL_LIGHT1, GL11.GL_POSITION, BufferHelper.floatBuffer(new float[] {25.0f, 25.0f, -25.0f, 1.0f}));
-//		GL11.glLight(GL11.GL_LIGHT1, GL11.GL_DIFFUSE, BufferHelper.floatBuffer(new float[] {1.0f, 1.0f, 1.0f, 1.0f}));
-//		GL11.glLight(GL11.GL_LIGHT1, GL11.GL_AMBIENT, BufferHelper.floatBuffer(new float[] { 0.0f, 0.0f, 0.0f, 0.0f }));
-//		GL11.glLight(GL11.GL_LIGHT1, GL11.GL_SPECULAR, BufferHelper.floatBuffer(new float[] { 0.2f, 0.0f, 0.0f, 0.0f }));
-//		GL11.glEnable(GL11.GL_LIGHT1);
-//		
+		GL11.glEnable(GL11.GL_LIGHTING);
+		
+		GL11.glLightModel(GL11.GL_LIGHT_MODEL_AMBIENT, BufferHelper.floatBuffer(new float[] {0.0f, 0.0f, 0.0f, 1.0f}));
+		GL11.glLight(GL11.GL_LIGHT1, GL11.GL_POSITION, BufferHelper.floatBuffer(new float[] {0.0f, 35.0f, -25.0f, 1.0f}));
+		GL11.glLight(GL11.GL_LIGHT1, GL11.GL_DIFFUSE, BufferHelper.floatBuffer(new float[] {1.0f, 1.0f, 1.0f, 1.0f}));
+		GL11.glLight(GL11.GL_LIGHT1, GL11.GL_AMBIENT, BufferHelper.floatBuffer(new float[] { 0.0f, 0.0f, 0.0f, 0.0f }));
+		GL11.glLight(GL11.GL_LIGHT1, GL11.GL_SPECULAR, BufferHelper.floatBuffer(new float[] { 0.2f, 1.0f, 0.0f, 0.0f }));
+		GL11.glEnable(GL11.GL_LIGHT1);
+		
 //		GL11.glEnable(GL11.GL_COLOR_MATERIAL);
 		GL11.glEnable(GL11.GL_NORMALIZE);
 		
